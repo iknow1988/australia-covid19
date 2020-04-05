@@ -2,6 +2,14 @@ const { NovelCovid } = require('novelcovid');
 const { write } = require('./file-manager');
 const {getHistoricalData } = require('./utils');
 
+const getDayData = (obj) => {
+  const keys = Object.keys(obj);
+  return keys.map((key, index) => ({
+      x: key,
+      y: obj[key].y,
+  }));
+};
+
 const fetchTop5GlobalHistoricalData = async () => {
   const track = new NovelCovid();
   const dailyData = await track.histroical(null);
@@ -16,11 +24,13 @@ const fetchTop5GlobalHistoricalData = async () => {
   top5.forEach(function(obj){
     globalHistoricalDailyData.push({
       country: obj.country,
-      data: getHistoricalData(obj.timeline).filter( x => x.id === "confirmed")[0].data
-    });
+      data: getDayData(getHistoricalData(obj.timeline).filter( 
+        x => x.id === "confirmed")[0].data.filter(
+          obj => obj.y>100))
+      });
   });
   write('./src/data/global_historical_data.json', JSON.stringify(globalHistoricalDailyData));
 }
 
 
-module.exports = fetchTop5GlobalHistoricalData;
+module.exports = fetchTop5GlobalHistoricalData();
